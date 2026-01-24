@@ -256,6 +256,19 @@ class UIAWebTextInfo(UIATextInfo):
 					field["content"] = obj.name
 		elif hasAriaLabel or hasAriaLabelledby:
 			field["alwaysReportName"] = True
+
+		# Enhanced handling for radio buttons: always include aria-labelledby label in browse mode
+		if role == controlTypes.Role.RADIOBUTTON:
+			# Check if this radio button uses aria-labelledby
+			if hasAriaLabelledby:
+				# Get the resolved name (browser should have resolved aria-labelledby)
+				resolvedName = obj.name
+				if resolvedName and resolvedName.strip():
+					# Ensure the resolved name is always announced for radio buttons
+					# This handles cases where multiple label sources exist (native label + aria-labelledby)
+					# Browser should prioritize aria-labelledby over native label according to ARIA spec
+					field["name"] = resolvedName
+					field["alwaysReportName"] = True
 		# Give lists an item count
 		if obj.role == controlTypes.Role.LIST:
 			child = UIAHandler.handler.clientObject.ControlViewWalker.GetFirstChildElement(obj.UIAElement)
